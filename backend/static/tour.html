@@ -64,6 +64,10 @@
 
     <!-- Video Controls -->
     <div class="flex items-center gap-2">
+      <select id="voice-select" onchange="onVoiceChange()" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-[#0f172a] text-cyan-300 border border-slate-700 hover:border-cyan-500/50 outline-none transition cursor-pointer max-w-[160px] sm:max-w-[210px] truncate" title="Select Narrator Voice">
+        <option value="">🎙️ Natural Voice</option>
+      </select>
+
       <button id="btn-toggle-speech" onclick="toggleVoice()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
         <span id="voice-icon">🔊</span> <span id="voice-label">Voice: ON</span>
       </button>
@@ -229,9 +233,9 @@
   <script>
     const SCENES = [
       {
-        tag: "Scene 1: Introduction & Cabin Home",
-        featureTitle: "1. Cabin Home & Easy Onboarding",
-        speech: "Welcome to CodeSentinel AI! Developed by team Tech_Solo for problem FT-05. Our platform replaces confusing enterprise jargon with an inviting, clear review studio. You can press the physical Enter key anytime to enter the cabin workout area!",
+        tag: "Scene 1: Introduction & Cabin Welcome",
+        featureTitle: "1. Welcome & Cabin Workout Space",
+        speech: "Hey there! Welcome! Come on in — let's explore CodeSentinel AI together. I'm Sentinel, your friendly code guide. You know how traditional tools hit you with scary red walls of text? We wanted to change that completely. See that big button right here? You can just tap your keyboard's Enter key anytime, and we'll dive right into our cabin workout area! Let's take a look.",
         render: () => `
           <div class="flex flex-col items-center text-center gap-4 p-4">
             <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-3xl shadow-xl shadow-cyan-500/20">
@@ -239,7 +243,7 @@
             </div>
             <h3 class="text-xl font-bold text-white">Welcome to CodeSentinel AI</h3>
             <p class="text-xs text-slate-300 max-w-md leading-relaxed">
-              Automated Code Review • Code A vs B Arena • Layer-by-Layer Flowchart
+              Friendly Automated Code Review • Code A vs B Arena • Layer-by-Layer Flowchart
             </p>
             <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/30">
               <span>🚀 Press Enter ↵ to Enter Cabin Workout</span>
@@ -248,9 +252,9 @@
         `
       },
       {
-        tag: "Scene 2: Repository Audit & Health Score",
-        featureTitle: "2. Repository Audit & Balanced Fairness Scoring",
-        speech: "In Repository Audit, CodeSentinel reviews multi-file ZIP projects up to 50MB. Instead of only deducting points, our ISO-25010 rubric discovers your code strengths and gives you verified 1-click copyable diff patches for every bug!",
+        tag: "Scene 2: Repository Audit & Fair Scoring",
+        featureTitle: "2. Repository Audit & 1-Click Fixes",
+        speech: "Now, take a look at the Repository Audit. Imagine you just pushed a big project. Instead of just pointing fingers and complaining, CodeSentinel celebrates your clean engineering practices too! And whenever it spots something like an SQL injection in db.py, it doesn't leave you hanging — it gives you the exact line number, explains why it happened in simple words, and offers a safe one-click fix. How cool is that?",
         render: () => `
           <div class="flex flex-col gap-3">
             <div class="grid grid-cols-3 gap-2">
@@ -268,8 +272,8 @@
               </div>
             </div>
             <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/50 flex flex-col gap-1 text-xs">
-              <span class="font-bold text-rose-300 flex items-center gap-1.5">🚨 CWE-89: SQL Injection Detected in app/db.py</span>
-              <p class="text-[11px] text-rose-200">Dynamic concatenation found. 1-Click parameterized fix ready.</p>
+              <span class="font-bold text-rose-300 flex items-center gap-1.5">🚨 CWE-89: SQL Injection in app/db.py</span>
+              <p class="text-[11px] text-rose-200">Dynamic string formatting detected. Safe 1-Click parameterized patch prepared.</p>
               <div class="p-2 rounded bg-black/80 font-mono text-[10px] text-emerald-300 mt-1">
                 cursor.execute("SELECT * FROM users WHERE user = %s", (username,))
               </div>
@@ -278,9 +282,9 @@
         `
       },
       {
-        tag: "Scene 3: Efficiency Duel Arena",
+        tag: "Scene 3: The Efficiency Duel",
         featureTitle: "3. Efficiency Duel: Code A vs Code B",
-        speech: "Have you ever wondered if a 5-line code is better than a 10-line code? Our Code Arena proves the Brevity Fallacy! While naive 5-line recursion freezes the machine at 1.1 Trillion operations, 10-line iteration executes in just 40 operations!",
+        speech: "Here's one of my favorite parts: the Efficiency Duel. A lot of people think: hey, shorter code is always better, right? Well, let's test that theory! Look at this naive 5-line recursive code. When data scales up, it takes over a trillion operations and freezes! Meanwhile, this friendly 10-line loop finishes in just 40 steps. Efficiency truly matters, and here, you can see it with your own eyes.",
         render: () => `
           <div class="flex flex-col gap-3">
             <div class="p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 flex items-center justify-between">
@@ -288,7 +292,7 @@
                 <span class="text-2xl">🏆</span>
                 <div>
                   <h4 class="text-xs font-bold text-emerald-300">Winner: Code B (Iterative DP)</h4>
-                  <span class="text-[10px] text-slate-300">O(N) Time vs Naive O(2^N) Recursion</span>
+                  <span class="text-[10px] text-slate-300">O(N) Linear Time vs Naive O(2^N) Recursion</span>
                 </div>
               </div>
               <span class="px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 text-[10px] font-mono font-bold">40 ops vs 1.1T ops</span>
@@ -308,8 +312,8 @@
       },
       {
         tag: "Scene 4: Layer-by-Layer Architecture Stepper",
-        featureTitle: "4. Architecture Flowchart & Error Stepper",
-        speech: "Inspired by modern architectural visualizers, our flowchart lets you trace requests layer-by-layer from the browser down to the database. Hit Play, and watch an attack travel until it gets caught at db.py with zero guesswork!",
+        featureTitle: "4. Architecture Flowchart & Live Stepper",
+        speech: "Next up, let's trace how requests actually travel through your system. Think of it like a train moving through stations: from your browser, to the main router, through your business logic, and straight to the database. When you press Play, watch what happens. If an attacker tries to inject bad data, you'll see the exact layer turn red, showing you precisely what happened and how to patch it.",
         render: () => `
           <div class="flex flex-col gap-2">
             <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs">
@@ -333,8 +337,8 @@
       },
       {
         tag: "Scene 5: Multi-Form Code Studio",
-        featureTitle: "5. Multi-Form Code Optimizations",
-        speech: "Software engineering is never one-size-fits-all. Our Multi-Form Studio converts bottlenecks into 3 distinct production forms: Form 1 for maximum Big-O speed, Form 2 for low-memory streaming, and Form 3 for reusable component design.",
+        featureTitle: "5. Multi-Form Code Studio",
+        speech: "And remember: software design isn't one-size-fits-all. In our Multi-Form Studio, you can switch between maximum speed, low-memory streaming, or clean reusable components with just one click. It gives you multiple ways to solve the same problem depending on your app's needs.",
         render: () => `
           <div class="flex flex-col gap-3">
             <div class="flex gap-2">
@@ -351,9 +355,9 @@
         `
       },
       {
-        tag: "Scene 6: Summary & Hackathon Submission",
-        featureTitle: "6. Summary & Ready for Production",
-        speech: "CodeSentinel AI passed all 10 automated test suites with 100 percent AST precision, zero hallucinations, and multi-database support. Thank you for watching the demo of CodeSentinel AI by team Tech_Solo!",
+        tag: "Scene 6: Summary & 100% Test Pass",
+        featureTitle: "6. 10/10 Test Suites & Multi-DB Passing",
+        speech: "To wrap things up, all 10 core subsystems pass with 100 percent precision across SQLite, Postgres, MySQL, Oracle, and MongoDB. Thank you so much for learning with me today! Have fun reviewing your code!",
         render: () => `
           <div class="flex flex-col items-center text-center gap-3 p-4">
             <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl shadow-xl">
@@ -361,7 +365,7 @@
             </div>
             <h3 class="text-lg font-bold text-white">All 10 Test Subsystems Passing</h3>
             <p class="text-xs text-slate-300 max-w-sm">
-              Tested across SQLite, PostgreSQL, MySQL, Oracle, SQLAlchemy, and MongoDB.
+              Deterministic AST compiler engine tested across SQLite, PostgreSQL, MySQL, Oracle, SQLAlchemy, and MongoDB.
             </p>
             <div class="px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-800 text-cyan-300 text-xs font-bold font-mono">
               Team: Tech_Solo • Sreenivasan M
@@ -375,6 +379,74 @@
     let isPlaying = false;
     let playTimer = null;
     let voiceEnabled = true;
+
+        let availableVoices = [];
+    let selectedVoice = null;
+
+    function initVoices() {
+      if (!("speechSynthesis" in window)) return;
+      availableVoices = window.speechSynthesis.getVoices();
+      const select = document.getElementById("voice-select");
+      if (!select) return;
+
+      select.innerHTML = "";
+      if (availableVoices.length === 0) return;
+
+      // Friendly teacher voice preference list
+      const preferredIndices = [];
+      availableVoices.forEach((v, i) => {
+        const n = v.name.toLowerCase();
+        const l = v.lang.toLowerCase();
+        if (l.startsWith("en") && (
+          n.includes("natural") || n.includes("online") || n.includes("jenny") ||
+          n.includes("aria") || n.includes("google us") || n.includes("google") ||
+          n.includes("samantha") || n.includes("zira") || n.includes("friendly") ||
+          n.includes("female") || n.includes("cynthia")
+        )) {
+          preferredIndices.push(i);
+        }
+      });
+
+      const bestIndex = preferredIndices.length > 0 ? preferredIndices[0] : 0;
+
+      availableVoices.forEach((v, i) => {
+        const opt = document.createElement("option");
+        opt.value = i;
+        const isBest = preferredIndices.includes(i);
+        opt.textContent = (isBest ? "🌟 " : "") + v.name.replace(/Microsoft /g, "").replace(/Desktop /g, "") + " (" + v.lang + ")";
+        if (i === bestIndex) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      selectedVoice = availableVoices[bestIndex];
+    }
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function onVoiceChange() {
+      const select = document.getElementById("voice-select");
+      if (select && availableVoices[select.value]) {
+        selectedVoice = availableVoices[select.value];
+        speakSceneVoice(SCENES[currentScene].speech);
+      }
+    }
+
+    function speakSceneVoice(text) {
+      if (!voiceEnabled || !("speechSynthesis" in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      if (selectedVoice) {
+        utter.voice = selectedVoice;
+      }
+      // Calm, friendly, human teacher pace and cheerful pitch
+      utter.rate = 0.92;
+      utter.pitch = 1.08;
+      utter.volume = 0.88;
+      window.speechSynthesis.speak(utter);
+    }
 
     function renderCurrentScene() {
       const scene = SCENES[currentScene];
@@ -398,13 +470,7 @@
         }
       });
 
-      if (voiceEnabled && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(scene.speech);
-        utter.rate = 1.05;
-        utter.pitch = 1.0;
-        window.speechSynthesis.speak(utter);
-      }
+      speakSceneVoice(scene.speech);
     }
 
     function togglePlay() {
