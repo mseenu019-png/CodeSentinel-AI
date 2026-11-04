@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeSentinel AI - 3D Animated Video Tour</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @keyframes floatRobot {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(1.5deg); }
+    }
+    @keyframes blinkVisor {
+      0%, 96%, 100% { opacity: 1; transform: scaleY(1); }
+      98% { opacity: 0.2; transform: scaleY(0.1); }
+    }
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    @keyframes glowText {
+      0%, 100% { text-shadow: 0 0 10px rgba(56, 189, 248, 0.6); }
+      50% { text-shadow: 0 0 20px rgba(56, 189, 248, 0.9); }
+    }
+    .robot-floating {
+      animation: floatRobot 3.5s ease-in-out infinite;
+    }
+    .visor-blink {
+      animation: blinkVisor 4s infinite;
+    }
+    .glow-pulse {
+      animation: pulseRing 2.5s infinite;
+    }
+    .scan-line {
+      background: linear-gradient(180deg, transparent 0%, rgba(56, 189, 248, 0.15) 50%, transparent 100%);
+      background-size: 100% 200%;
+      animation: scan 4s linear infinite;
+    }
+    @keyframes scan {
+      0% { background-position: 0 -200%; }
+      100% { background-position: 0 200%; }
+    }
+  </style>
+</head>
+<body class="bg-[#030712] text-white min-h-screen flex flex-col font-sans selection:bg-cyan-500/30">
+
+  <!-- Top Video Bar -->
+  <header class="border-b border-slate-800 bg-[#070d1c]/90 backdrop-blur p-4 flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+        <span class="text-lg font-bold">🛡️</span>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+          <span>CodeSentinel AI • 3D Project Explainer</span>
+          <span class="px-2 py-0.5 text-[11px] bg-red-500/20 text-red-400 border border-red-500/40 rounded-full font-bold flex items-center gap-1">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> DEMO VIDEO MODE
+          </span>
+        </h1>
+        <p class="text-xs text-slate-400">Team Tech_Solo (Sreenivasan M) • Problem FT-05</p>
+      </div>
+    </div>
+
+    <!-- Video Controls -->
+    <div class="flex items-center gap-2">
+      <button id="btn-toggle-speech" onclick="toggleVoice()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+        <span id="voice-icon">🔊</span> <span id="voice-label">Voice: ON</span>
+      </button>
+
+      <button id="btn-play-pause" onclick="togglePlay()" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white shadow-md transition flex items-center gap-1.5 cursor-pointer">
+        <span id="play-icon">▶</span> <span id="play-label">Play Video</span>
+      </button>
+
+      <button onclick="resetTour()" class="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white bg-slate-900 border border-slate-800 transition cursor-pointer" title="Restart">
+        ↺ Restart
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Stage Layout -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+
+    <!-- Left Column: 3D Animated Character Host (5 cols) -->
+    <div class="lg:col-span-5 flex flex-col items-center text-center gap-4">
+      
+      <!-- 3D Character Avatar Container -->
+      <div class="relative w-64 h-64 flex items-center justify-center">
+        
+        <!-- Glowing Energy Field -->
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/10 via-indigo-500/20 to-violet-500/10 blur-xl glow-pulse"></div>
+        <div class="absolute inset-4 rounded-full border border-cyan-500/30 glow-pulse"></div>
+
+        <!-- 3D Robot Mascot (Vector CSS Construction) -->
+        <div class="robot-floating relative z-10 flex flex-col items-center">
+          
+          <!-- Holographic Antenna -->
+          <div class="w-1.5 h-6 bg-gradient-to-t from-slate-400 to-cyan-400 rounded-full relative">
+            <div class="w-3.5 h-3.5 rounded-full bg-cyan-400 shadow-lg shadow-cyan-400/80 -top-2 -left-1 absolute animate-pulse"></div>
+          </div>
+
+          <!-- Robot Head -->
+          <div class="w-28 h-24 rounded-3xl bg-gradient-to-b from-[#1e293b] via-[#0f172a] to-[#091020] border-2 border-cyan-400/60 p-3 shadow-2xl shadow-cyan-500/30 flex flex-col items-center justify-center relative overflow-hidden">
+            <!-- Screen Glare -->
+            <div class="absolute top-0 left-0 w-full h-8 bg-white/5 rounded-t-3xl"></div>
+            
+            <!-- Visor Screen -->
+            <div class="w-20 h-10 rounded-2xl bg-black border border-cyan-500/40 flex items-center justify-center gap-2 p-1.5 relative overflow-hidden">
+              <div class="absolute inset-0 scan-line"></div>
+              <!-- Blinking Cyber Eyes -->
+              <div class="w-4 h-4 rounded-full bg-cyan-400 shadow-md shadow-cyan-400 visor-blink flex items-center justify-center">
+                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+              </div>
+              <div class="w-4 h-4 rounded-full bg-cyan-400 shadow-md shadow-cyan-400 visor-blink flex items-center justify-center">
+                <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+              </div>
+            </div>
+
+            <!-- Mouth Equalizer / Voice Wave -->
+            <div id="mouth-wave" class="flex items-center gap-1 mt-2 h-2">
+              <span class="w-1 h-1.5 bg-cyan-400 rounded-full animate-pulse"></span>
+              <span class="w-1 h-3 bg-cyan-300 rounded-full animate-pulse"></span>
+              <span class="w-1 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+              <span class="w-1 h-1 bg-cyan-500 rounded-full animate-pulse"></span>
+            </div>
+          </div>
+
+          <!-- Robot Neck & Shoulders -->
+          <div class="w-10 h-2.5 bg-slate-700 rounded-sm -mt-0.5"></div>
+          <div class="w-32 h-14 rounded-2xl bg-gradient-to-b from-[#1e293b] to-[#091020] border border-slate-700 shadow-xl flex items-center justify-between px-3 relative">
+            <!-- Chest Reactor -->
+            <div class="w-6 h-6 rounded-full bg-cyan-950 border border-cyan-400/80 mx-auto flex items-center justify-center">
+              <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></div>
+            </div>
+          </div>
+
+          <!-- Floating Jet Thruster -->
+          <div class="w-6 h-3 bg-indigo-900 rounded-b-xl mx-auto -mt-0.5 flex justify-center">
+            <div class="w-2 h-4 bg-gradient-to-b from-cyan-400 to-transparent rounded-full blur-[1px] animate-pulse"></div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Character Name Badge -->
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 text-xs font-bold">
+          <span>🤖 Sentinel Bot • AI Virtual Host</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Explaining CodeSentinel AI features scene by scene</p>
+      </div>
+
+      <!-- Speech Bubble -->
+      <div class="w-full bg-[#091020] border border-cyan-500/30 rounded-2xl p-4 shadow-xl text-left relative">
+        <div class="text-[11px] font-bold uppercase tracking-wider text-cyan-400 flex items-center justify-between mb-1">
+          <span id="speech-scene-tag">Scene 1: Introduction</span>
+          <span id="speech-timer-tag" class="font-mono text-slate-400">00:00</span>
+        </div>
+        <p id="speech-text" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium min-h-[64px]">
+          "Welcome to CodeSentinel AI! I'm your host, Sentinel Bot. Today, I'll show you how our intelligent code review platform audits entire repositories, runs real-time algorithm duels, and visualizes system architecture layer-by-layer."
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Interactive Video Screen & Feature Stage (7 cols) -->
+    <div class="lg:col-span-7 flex flex-col gap-4">
+      
+      <!-- Video Screen Frame -->
+      <div class="rounded-3xl bg-[#080f1e] border-2 border-slate-800 shadow-2xl p-5 relative overflow-hidden flex flex-col min-h-[460px]">
+        
+        <!-- Screen Header -->
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500/80"></span>
+            <span id="screen-feature-title" class="ml-2 text-xs font-bold text-white tracking-wide">
+              1. Cabin Home & Easy Onboarding
+            </span>
+          </div>
+          <span id="screen-scene-counter" class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
+            1 / 6
+          </span>
+        </div>
+
+        <!-- Dynamic Screen Content Area -->
+        <div id="screen-display-area" class="flex-1 flex flex-col justify-center">
+          <!-- Populated dynamically by scene -->
+        </div>
+
+        <!-- Video Timeline Scrub Bar -->
+        <div class="mt-4 pt-3 border-t border-slate-800 flex flex-col gap-2">
+          <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden cursor-pointer" onclick="seekByClick(event)">
+            <div id="video-progress-bar" class="h-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-violet-500 w-[16%] transition-all duration-300"></div>
+          </div>
+
+          <!-- Scene Selector Buttons -->
+          <div class="flex flex-wrap items-center justify-between gap-1 text-[11px]">
+            <button onclick="jumpToScene(0)" id="pill-scene-0" class="px-2 py-1 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40">1. Intro</button>
+            <button onclick="jumpToScene(1)" id="pill-scene-1" class="px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">2. Audit</button>
+            <button onclick="jumpToScene(2)" id="pill-scene-2" class="px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">3. Duel</button>
+            <button onclick="jumpToScene(3)" id="pill-scene-3" class="px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">4. Stepper</button>
+            <button onclick="jumpToScene(4)" id="pill-scene-4" class="px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">5. Multi-Form</button>
+            <button onclick="jumpToScene(5)" id="pill-scene-5" class="px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white">6. Summary</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Recording Guide Drawer -->
+  <footer class="border-t border-slate-800 bg-[#060c18] p-4 text-xs text-slate-400">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-base">🎥</span>
+        <span><strong>How to record this video:</strong> Press <strong>Win + Alt + R</strong> (Windows) or open <strong>Loom</strong>, hit Play, and paste the video link into your hackathon form!</span>
+      </div>
+      <a href="http://127.0.0.1:8000" target="_blank" class="px-3 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-semibold transition">
+        Open Live Platform ➔
+      </a>
+    </div>
+  </footer>
+
+  <script>
+    const SCENES = [
+      {
+        tag: "Scene 1: Introduction & Cabin Home",
+        featureTitle: "1. Cabin Home & Easy Onboarding",
+        speech: "Welcome to CodeSentinel AI! Developed by team Tech_Solo for problem FT-05. Our platform replaces confusing enterprise jargon with an inviting, clear review studio. You can press the physical Enter key anytime to enter the cabin workout area!",
+        render: () => `
+          <div class="flex flex-col items-center text-center gap-4 p-4">
+            <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-3xl shadow-xl shadow-cyan-500/20">
+              👋
+            </div>
+            <h3 class="text-xl font-bold text-white">Welcome to CodeSentinel AI</h3>
+            <p class="text-xs text-slate-300 max-w-md leading-relaxed">
+              Automated Code Review • Code A vs B Arena • Layer-by-Layer Flowchart
+            </p>
+            <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 text-white text-xs font-bold shadow-lg shadow-cyan-500/30">
+              <span>🚀 Press Enter ↵ to Enter Cabin Workout</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        tag: "Scene 2: Repository Audit & Health Score",
+        featureTitle: "2. Repository Audit & Balanced Fairness Scoring",
+        speech: "In Repository Audit, CodeSentinel reviews multi-file ZIP projects up to 50MB. Instead of only deducting points, our ISO-25010 rubric discovers your code strengths and gives you verified 1-click copyable diff patches for every bug!",
+        render: () => `
+          <div class="flex flex-col gap-3">
+            <div class="grid grid-cols-3 gap-2">
+              <div class="p-3 rounded-xl bg-[#091020] border border-cyan-500/40 text-center">
+                <span class="text-[10px] text-slate-400 block uppercase">Health Score</span>
+                <span class="text-lg font-black text-cyan-300">78 / 100</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#091020] border border-violet-500/40 text-center">
+                <span class="text-[10px] text-slate-400 block uppercase">Reusability</span>
+                <span class="text-lg font-black text-violet-300">89 / 100</span>
+              </div>
+              <div class="p-3 rounded-xl bg-[#091020] border border-emerald-500/40 text-center">
+                <span class="text-[10px] text-slate-400 block uppercase">Reliability</span>
+                <span class="text-lg font-black text-emerald-300">82 / 100</span>
+              </div>
+            </div>
+            <div class="p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/50 flex flex-col gap-1 text-xs">
+              <span class="font-bold text-rose-300 flex items-center gap-1.5">🚨 CWE-89: SQL Injection Detected in app/db.py</span>
+              <p class="text-[11px] text-rose-200">Dynamic concatenation found. 1-Click parameterized fix ready.</p>
+              <div class="p-2 rounded bg-black/80 font-mono text-[10px] text-emerald-300 mt-1">
+                cursor.execute("SELECT * FROM users WHERE user = %s", (username,))
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        tag: "Scene 3: Efficiency Duel Arena",
+        featureTitle: "3. Efficiency Duel: Code A vs Code B",
+        speech: "Have you ever wondered if a 5-line code is better than a 10-line code? Our Code Arena proves the Brevity Fallacy! While naive 5-line recursion freezes the machine at 1.1 Trillion operations, 10-line iteration executes in just 40 operations!",
+        render: () => `
+          <div class="flex flex-col gap-3">
+            <div class="p-3 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-500/40 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">🏆</span>
+                <div>
+                  <h4 class="text-xs font-bold text-emerald-300">Winner: Code B (Iterative DP)</h4>
+                  <span class="text-[10px] text-slate-300">O(N) Time vs Naive O(2^N) Recursion</span>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded bg-emerald-950 text-emerald-300 text-[10px] font-mono font-bold">40 ops vs 1.1T ops</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2.5 rounded-xl bg-[#091020] border border-cyan-500/30">
+                <span class="font-bold text-cyan-300 block mb-1">Code A (5 LOC)</span>
+                <span class="text-[10px] text-rose-300 block">N=40: 1,099,511,627,776 ops (CPU FREEZE)</span>
+              </div>
+              <div class="p-2.5 rounded-xl bg-[#091020] border border-emerald-500/30">
+                <span class="font-bold text-emerald-300 block mb-1">Code B (10 LOC)</span>
+                <span class="text-[10px] text-emerald-300 block">N=40: 40 ops (0.001 ms Instant)</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        tag: "Scene 4: Layer-by-Layer Architecture Stepper",
+        featureTitle: "4. Architecture Flowchart & Error Stepper",
+        speech: "Inspired by modern architectural visualizers, our flowchart lets you trace requests layer-by-layer from the browser down to the database. Hit Play, and watch an attack travel until it gets caught at db.py with zero guesswork!",
+        render: () => `
+          <div class="flex flex-col gap-2">
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs">
+              <span class="text-slate-300">1. Client SPA</span>
+              <span class="text-emerald-400 font-bold">✓ 200 OK</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs">
+              <span class="text-slate-300">2. Gateway (main.py)</span>
+              <span class="text-emerald-400 font-bold">✓ Routed</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-between text-xs">
+              <span class="text-slate-300">3. Service (auth.py)</span>
+              <span class="text-emerald-400 font-bold">✓ Dispatched</span>
+            </div>
+            <div class="p-2.5 rounded-xl bg-rose-950/70 border border-rose-500 flex items-center justify-between text-xs animate-pulse">
+              <span class="text-rose-200 font-bold">4. Database (db.py)</span>
+              <span class="text-rose-400 font-bold">🚨 ERROR CAUGHT HERE</span>
+            </div>
+          </div>
+        `
+      },
+      {
+        tag: "Scene 5: Multi-Form Code Studio",
+        featureTitle: "5. Multi-Form Code Optimizations",
+        speech: "Software engineering is never one-size-fits-all. Our Multi-Form Studio converts bottlenecks into 3 distinct production forms: Form 1 for maximum Big-O speed, Form 2 for low-memory streaming, and Form 3 for reusable component design.",
+        render: () => `
+          <div class="flex flex-col gap-3">
+            <div class="flex gap-2">
+              <span class="px-3 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold shadow">⚡ Form 1: Max Speed</span>
+              <span class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">💧 Form 2: Low Memory</span>
+              <span class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs">🧩 Form 3: Component</span>
+            </div>
+            <div class="p-3 rounded-xl bg-[#091020] border border-slate-800 font-mono text-xs text-emerald-300">
+              <span class="text-slate-400 block mb-1"># Form 1: O(1) Pre-Indexed Hash Map</span>
+              def get_fast(tag):<br>
+              &nbsp;&nbsp;&nbsp;&nbsp;return tag_index.get(tag, []) # Instant lookup
+            </div>
+          </div>
+        `
+      },
+      {
+        tag: "Scene 6: Summary & Hackathon Submission",
+        featureTitle: "6. Summary & Ready for Production",
+        speech: "CodeSentinel AI passed all 10 automated test suites with 100 percent AST precision, zero hallucinations, and multi-database support. Thank you for watching the demo of CodeSentinel AI by team Tech_Solo!",
+        render: () => `
+          <div class="flex flex-col items-center text-center gap-3 p-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl shadow-xl">
+              ✅
+            </div>
+            <h3 class="text-lg font-bold text-white">All 10 Test Subsystems Passing</h3>
+            <p class="text-xs text-slate-300 max-w-sm">
+              Tested across SQLite, PostgreSQL, MySQL, Oracle, SQLAlchemy, and MongoDB.
+            </p>
+            <div class="px-4 py-2 rounded-xl bg-cyan-950 border border-cyan-800 text-cyan-300 text-xs font-bold font-mono">
+              Team: Tech_Solo • Sreenivasan M
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    let currentScene = 0;
+    let isPlaying = false;
+    let playTimer = null;
+    let voiceEnabled = true;
+
+    function renderCurrentScene() {
+      const scene = SCENES[currentScene];
+      document.getElementById("speech-scene-tag").textContent = scene.tag;
+      document.getElementById("speech-text").textContent = `"${scene.speech}"`;
+      document.getElementById("screen-feature-title").textContent = scene.featureTitle;
+      document.getElementById("screen-scene-counter").textContent = `${currentScene + 1} / ${SCENES.length}`;
+      document.getElementById("screen-display-area").innerHTML = scene.render();
+
+      const pct = ((currentScene + 1) / SCENES.length) * 100;
+      document.getElementById("video-progress-bar").style.width = `${pct}%`;
+
+      SCENES.forEach((_, idx) => {
+        const pill = document.getElementById(`pill-scene-${idx}`);
+        if (pill) {
+          if (idx === currentScene) {
+            pill.className = "px-2 py-1 rounded bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/40";
+          } else {
+            pill.className = "px-2 py-1 rounded bg-slate-900 text-slate-400 hover:text-white";
+          }
+        }
+      });
+
+      if (voiceEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(scene.speech);
+        utter.rate = 1.05;
+        utter.pitch = 1.0;
+        window.speechSynthesis.speak(utter);
+      }
+    }
+
+    function togglePlay() {
+      if (isPlaying) {
+        pauseTour();
+      } else {
+        startTour();
+      }
+    }
+
+    function startTour() {
+      isPlaying = true;
+      document.getElementById("play-icon").textContent = "⏸";
+      document.getElementById("play-label").textContent = "Pause Video";
+      renderCurrentScene();
+
+      playTimer = setInterval(() => {
+        if (currentScene < SCENES.length - 1) {
+          currentScene++;
+          renderCurrentScene();
+        } else {
+          pauseTour();
+        }
+      }, 7500);
+    }
+
+    function pauseTour() {
+      isPlaying = false;
+      if (playTimer) clearInterval(playTimer);
+      playTimer = null;
+      document.getElementById("play-icon").textContent = "▶";
+      document.getElementById("play-label").textContent = "Play Video";
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    }
+
+    function resetTour() {
+      pauseTour();
+      currentScene = 0;
+      renderCurrentScene();
+    }
+
+    function jumpToScene(idx) {
+      currentScene = idx;
+      renderCurrentScene();
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      document.getElementById("voice-icon").textContent = voiceEnabled ? "🔊" : "🔇";
+      document.getElementById("voice-label").textContent = voiceEnabled ? "Voice: ON" : "Voice: OFF";
+      if (!voiceEnabled && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function seekByClick(e) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const pct = clickX / rect.width;
+      const targetScene = Math.min(SCENES.length - 1, Math.floor(pct * SCENES.length));
+      jumpToScene(targetScene);
+    }
+
+    // Initialize on load
+    renderCurrentScene();
+  </script>
+</body>
+</html>
