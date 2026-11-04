@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeSentinel AI | Automated Code Review & Architecture Studio</title>
+  
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              base: '#030712',
+              surface: '#080f1e',
+              card: '#0d1527',
+              border: '#1f293d',
+              accent: '#38bdf8'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Custom Performant Styles with Cache Busting -->
+  <link rel="stylesheet" href="/styles.css?v=2.7.0">
+</head>
+<body class="bg-[#030712] text-white min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- Top Sticky Navigation Bar -->
+  <header class="border-b border-slate-800/80 bg-[#070d1c]/95 backdrop-blur sticky top-0 z-50 px-4 lg:px-8 py-2.5 transition-all">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <div onclick="switchTab('welcome')" class="w-9 h-9 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-cyan-500/20 cursor-pointer hover:scale-105 transition transform">
+          <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span onclick="switchTab('welcome')" class="font-bold text-base tracking-tight bg-gradient-to-r from-white via-slate-100 to-cyan-300 bg-clip-text text-transparent cursor-pointer">CodeSentinel AI</span>
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800/60 rounded-full uppercase tracking-wider">v2.7 Friendly Edition</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Friendly Code Review • Code A vs B Duel • Flowchart & Error Stepper</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center gap-1 bg-[#091020] p-1 rounded-xl border border-slate-800 text-xs">
+        <button id="tab-welcome" onclick="switchTab('welcome')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-semibold transition-all bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shadow-sm">
+          <i data-lucide="home" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Cabin Home</span>
+        </button>
+
+        <button id="tab-repo" onclick="switchTab('repo')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+          <i data-lucide="folder-git-2" class="w-3.5 h-3.5 text-blue-400"></i>
+          <span>Repository Audit</span>
+          <span id="badge-issue-count" class="px-1.5 py-0.2 bg-red-500/20 text-red-400 text-[10px] rounded-full font-bold">10</span>
+        </button>
+
+        <button id="tab-duel" onclick="switchTab('duel')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+          <i data-lucide="swords" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Efficiency Duel</span>
+          <span class="px-1.5 py-0.2 bg-amber-500/20 text-amber-300 text-[10px] rounded-full font-bold">Arena</span>
+        </button>
+
+        <button id="tab-reusability" onclick="switchTab('reusability')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-violet-400"></i>
+          <span>Multi-Form</span>
+          <span class="px-1.5 py-0.2 bg-violet-500/20 text-violet-300 text-[10px] rounded-full font-bold">Studio</span>
+        </button>
+
+        <button id="tab-graph" onclick="switchTab('graph')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+          <i data-lucide="git-merge" class="w-3.5 h-3.5 text-indigo-400"></i>
+          <span>Architecture Flowchart</span>
+        </button>
+
+        <button id="tab-pipeline" onclick="switchTab('pipeline')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium text-slate-400 hover:text-white transition-all">
+          <i data-lucide="cpu" class="w-3.5 h-3.5 text-emerald-400"></i>
+          <span>Pipeline Engine</span>
+        </button>
+      </nav>
+
+      <!-- Global Actions -->
+      <div class="flex items-center gap-2">
+        <label class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 cursor-pointer transition">
+          <i data-lucide="upload-cloud" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Upload ZIP</span>
+          <input type="file" id="file-uploader" accept=".zip,.py,.js,.ts,.tsx,.jsx,.java" class="hidden" onchange="handleFileUpload(event)">
+        </label>
+
+        <button onclick="downloadPdfReport()" class="flex items-center gap-1.5 px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg shadow-sm transition">
+          <i data-lucide="file-down" class="w-3.5 h-3.5"></i>
+          <span>PDF Report</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6 flex flex-col gap-6">
+
+    <!-- ==================== TAB 0: CABIN HOME (CLEAN & ATTRACTIVE ONBOARDING) ==================== -->
+    <div id="view-welcome" class="flex flex-col gap-8 animate-fade-in-scale">
+      
+      <!-- High-Impact Hero Section -->
+      <section class="glass-panel-elevated rounded-3xl p-8 lg:p-12 border border-cyan-500/30 flex flex-col items-center text-center relative overflow-hidden bg-gradient-to-b from-[#0b1429] via-[#070e1c] to-[#030712]">
+        
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/90 border border-cyan-500/50 text-cyan-300 text-xs font-semibold shadow-inner mb-4">
+          <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+          <span>Simple Code Review • Code A vs B Duel • Flowchart & Error Stepper</span>
+        </div>
+
+        <h1 class="text-3xl lg:text-5xl font-black tracking-tight text-white max-w-3xl leading-tight">
+          Welcome to CodeSentinel AI 👋 <br>
+          <span class="bg-gradient-to-r from-cyan-400 via-sky-300 to-indigo-400 bg-clip-text text-transparent">Clear, Friendly & Easy to Understand.</span>
+        </h1>
+
+        <p class="text-sm lg:text-base text-slate-300 max-w-2xl mt-4 leading-relaxed font-normal">
+          Follow your code layer-by-layer like a flowchart, see exactly what is happening at every step, spot where errors occurred, and compare algorithms side-by-side without confusing jargon.
+        </p>
+
+        <!-- Primary Action Callout -->
+        <div class="my-6 flex flex-wrap items-center justify-center gap-3">
+          <button id="btn-enter-cabin" onclick="enterCabinWorkout()" class="animate-pulse-pill flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 via-indigo-600 to-violet-600 hover:from-cyan-400 hover:to-violet-500 text-white font-bold text-sm shadow-xl shadow-cyan-500/30 transition transform hover:scale-105 active:scale-95 cursor-pointer">
+            <i data-lucide="door-open" class="w-5 h-5"></i>
+            <span>Enter Cabin Workout Area</span>
+            <span class="kbd-key ml-2">ENTER ↵</span>
+          </button>
+
+          <button onclick="loadDemoAndOpen('vulnerable_ecommerce')" class="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition cursor-pointer">
+            <i data-lucide="play" class="w-4 h-4 text-cyan-400"></i>
+            <span>Try Demo Product</span>
+          </button>
+
+          <button onclick="enterSpecificStation('duel')" class="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition cursor-pointer">
+            <i data-lucide="swords" class="w-4 h-4 text-amber-400"></i>
+            <span>Compare Code A vs B</span>
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-400 flex items-center gap-1.5">
+          <i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span>Press your physical keyboard <kbd class="kbd-key">Enter ↵</kbd> key anytime to enter immediately!</span>
+        </p>
+
+      </section>
+
+      <!-- 3-Step Explainable Area: What We Are Going to Do -->
+      <section class="glass-panel rounded-3xl p-6 lg:p-8 flex flex-col gap-4 border border-slate-800">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+              <i data-lucide="compass" class="w-4 h-4"></i>
+            </span>
+            <div>
+              <h3 class="text-base font-bold text-white">How CodeSentinel Works (Simple & Clear)</h3>
+              <p class="text-xs text-slate-400">Follow these 3 simple stages to review, compare, and optimize any codebase:</p>
+            </div>
+          </div>
+          <span class="text-xs text-cyan-400 font-semibold hidden sm:inline">100% Deterministic AST Analysis</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+          
+          <div class="p-5 rounded-2xl bg-[#091020] border border-slate-800 flex flex-col gap-2">
+            <div class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+              1
+            </div>
+            <h4 class="font-bold text-sm text-white mt-1">1. Push or Choose Code</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Drop your ZIP project (up to 50MB), paste a GitHub URL, or paste any two snippets into the Arena.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#091020] border border-slate-800 flex flex-col gap-2">
+            <div class="w-7 h-7 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center font-bold text-xs">
+              2
+            </div>
+            <h4 class="font-bold text-sm text-white mt-1">2. Deep Automated Analysis</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              We parse exact syntax trees to pinpoint security flaws (SQLi, secrets) and calculate actual Big-O operational complexity.
+            </p>
+          </div>
+
+          <div class="p-5 rounded-2xl bg-[#091020] border border-slate-800 flex flex-col gap-2">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
+              3
+            </div>
+            <h4 class="font-bold text-sm text-white mt-1">3. 1-Click Fixes & Flowcharts</h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Apply verified remediation diffs, explore Speed vs Memory forms, and view your system architecture in an ER flowchart.
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 4 Station Cards -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+        
+        <div onclick="enterSpecificStation('repo')" class="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-blue-500/50 hover:bg-[#0c162b] cursor-pointer transition flex flex-col justify-between group">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+              <i data-lucide="folder-git-2" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-white flex items-center justify-between">
+              <span>Repository Audit</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition"></i>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Full project health, security audit, code strengths, and copyable safe patches.
+            </p>
+          </div>
+          <span class="text-[11px] font-semibold text-blue-400 mt-3 block">Start Project Audit →</span>
+        </div>
+
+        <div onclick="enterSpecificStation('duel')" class="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-amber-500/50 hover:bg-[#0c162b] cursor-pointer transition flex flex-col justify-between group">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+              <i data-lucide="swords" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-white flex items-center justify-between">
+              <span>Code A vs Code B</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition"></i>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Paste any two snippets. Compare line count vs computational scaling and see who wins.
+            </p>
+          </div>
+          <span class="text-[11px] font-semibold text-amber-400 mt-3 block">Run Efficiency Duel →</span>
+        </div>
+
+        <div onclick="enterSpecificStation('reusability')" class="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-violet-500/50 hover:bg-[#0c162b] cursor-pointer transition flex flex-col justify-between group">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-white flex items-center justify-between">
+              <span>Multi-Form Studio</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-violet-400 transition"></i>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Transform code into Speed, Low-Memory, and Reusable Component forms in 1 click.
+            </p>
+          </div>
+          <span class="text-[11px] font-semibold text-violet-400 mt-3 block">View Code Forms →</span>
+        </div>
+
+        <div onclick="enterSpecificStation('graph')" class="glass-panel p-5 rounded-2xl border border-slate-800 hover:border-indigo-500/50 hover:bg-[#0c162b] cursor-pointer transition flex flex-col justify-between group">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-3 group-hover:scale-110 transition">
+              <i data-lucide="git-merge" class="w-5 h-5"></i>
+            </div>
+            <h3 class="font-bold text-sm text-white flex items-center justify-between">
+              <span>ER Flowchart</span>
+              <i data-lucide="arrow-right" class="w-4 h-4 text-slate-500 group-hover:text-indigo-400 transition"></i>
+            </h3>
+            <p class="text-xs text-slate-400 mt-1.5 leading-relaxed">
+              Clean ER diagram showing how main.py connects to services, db, and the frontend client.
+            </p>
+          </div>
+          <span class="text-[11px] font-semibold text-indigo-400 mt-3 block">View System Flowchart →</span>
+        </div>
+
+      </section>
+
+    </div>
+
+    <!-- ==================== TAB 1: REPOSITORY AUDIT (UPLOAD ZONE & DEMO PRODUCT) ==================== -->
+    <div id="view-repo" class="hidden flex flex-col gap-5 animate-fade-in-scale">
+      
+      <!-- Top Demo & Upload Hub -->
+      <section class="glass-panel rounded-2xl p-5 border border-cyan-500/30 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-gradient-to-r from-[#091224] via-[#050b16] to-[#091224]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center flex-shrink-0">
+            <i data-lucide="layers" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white uppercase tracking-wider">Active Project:</span>
+              <span id="active-demo-title" class="text-xs font-bold text-cyan-300">E-Commerce FastAPI Backend (Vulnerable)</span>
+            </div>
+            <p class="text-xs text-slate-400">Choose a demo project to test or upload your own source code (ZIP up to 50MB):</p>
+          </div>
+        </div>
+
+        <!-- Demo Pills & Upload Trigger -->
+        <div class="flex flex-wrap items-center gap-2 text-xs">
+          <button id="btn-demo-ecommerce" onclick="loadDemoAndOpen('vulnerable_ecommerce')" class="px-3 py-1.5 rounded-lg bg-cyan-950 text-cyan-300 border border-cyan-800 font-semibold transition flex items-center gap-1.5">
+            <i data-lucide="shopping-cart" class="w-3.5 h-3.5"></i> Demo 1: E-Commerce
+          </button>
+          <button id="btn-demo-duel" onclick="loadDemoAndOpen('algorithm_duel_suite')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-semibold hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i> Demo 2: Algorithm Suite
+          </button>
+          <button id="btn-demo-cloud" onclick="loadDemoAndOpen('fullstack_cloud_service')" class="px-3 py-1.5 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 font-semibold hover:bg-slate-700 transition flex items-center gap-1.5">
+            <i data-lucide="cloud" class="w-3.5 h-3.5 text-indigo-400"></i> Demo 3: Cloud Polyglot
+          </button>
+          
+          <label class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold cursor-pointer transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload Your Project
+            <input type="file" accept=".zip,.py,.js,.ts,.tsx,.jsx,.java" class="hidden" onchange="handleFileUpload(event)">
+          </label>
+        </div>
+      </section>
+
+      <!-- Segmented Sub-Nav: Clean & Focused -->
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+        <div class="flex items-center gap-1 bg-[#080f1e] p-1 rounded-xl border border-slate-800">
+          <button id="subtab-overview" onclick="switchRepoSubView('overview')" class="subnav-pill subnav-pill-active flex items-center gap-1.5">
+            <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+            <span>Executive Health Overview</span>
+          </button>
+          <button id="subtab-findings" onclick="switchRepoSubView('findings')" class="subnav-pill subnav-pill-inactive flex items-center gap-1.5">
+            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+            <span>Actionable Findings (<span id="subtab-findings-count">10</span>)</span>
+          </button>
+          <button id="subtab-inspector" onclick="switchRepoSubView('inspector')" class="subnav-pill subnav-pill-inactive flex items-center gap-1.5">
+            <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+            <span>Code Inspector & Fixes</span>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-slate-300 font-mono font-medium" id="banner-metrics">5 files, 98 LOC</span>
+          <button onclick="downloadPdfReport()" class="px-3 py-1 bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-200 border border-cyan-500/40 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> Export PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- SUB-VIEW 1: EXECUTIVE HEALTH OVERVIEW -->
+      <div id="repo-subview-overview" class="flex flex-col gap-5">
+        
+        <!-- Top Metrics Cards -->
+        <section class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          
+          <!-- Health Score -->
+          <div class="glass-panel rounded-2xl p-4 flex items-center gap-3 border border-slate-800">
+            <div class="relative w-12 h-12 flex items-center justify-center flex-shrink-0">
+              <svg class="w-12 h-12 transform -rotate-90">
+                <circle cx="24" cy="24" r="20" stroke="#1e293b" stroke-width="4" fill="none" />
+                <circle id="gauge-health-circle" cx="24" cy="24" r="20" stroke="#0ea5e9" stroke-width="4" fill="none" stroke-dasharray="125.6" stroke-dashoffset="25" stroke-linecap="round" />
+              </svg>
+              <span id="score-grade" class="absolute font-black text-base text-cyan-400">B</span>
+            </div>
+            <div>
+              <div class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Health Score</div>
+              <div class="flex items-baseline gap-1">
+                <span id="score-health" class="text-lg font-black text-white">78</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <div id="score-health-desc" class="text-[10px] text-cyan-400 font-medium truncate">Balanced</div>
+            </div>
+          </div>
+
+          <!-- Reusability -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-800">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Reusability</span>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-1">
+                <span id="score-reusability" class="text-lg font-black text-violet-400">89</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <p id="desc-reusability" class="text-[10px] text-slate-300 truncate">Modular Architecture</p>
+            </div>
+          </div>
+
+          <!-- Security -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-800">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Security</span>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-1">
+                <span id="score-security" class="text-lg font-black text-rose-400">72</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <p id="desc-security" class="text-[10px] text-slate-300 truncate">Patches Ready</p>
+            </div>
+          </div>
+
+          <!-- Efficiency -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-800">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Efficiency</span>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-1">
+                <span id="score-efficiency" class="text-lg font-black text-amber-400">75</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <p id="desc-efficiency" class="text-[10px] text-slate-300 truncate">Optimization Avail</p>
+            </div>
+          </div>
+
+          <!-- Maintainability -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-800">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Maintainability</span>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-1">
+                <span id="score-maintainability" class="text-lg font-black text-indigo-400">80</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <p id="desc-maintainability" class="text-[10px] text-slate-300 truncate">Clean Structure</p>
+            </div>
+          </div>
+
+          <!-- Reliability -->
+          <div class="glass-panel rounded-2xl p-4 flex flex-col justify-between border border-slate-800">
+            <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Reliability</span>
+            <div class="mt-1">
+              <div class="flex items-baseline gap-1">
+                <span id="score-reliability" class="text-lg font-black text-emerald-400">82</span>
+                <span class="text-[10px] text-slate-500">/100</span>
+              </div>
+              <p id="desc-reliability" class="text-[10px] text-slate-300 truncate">Guards Verified</p>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Executive Summary Banner -->
+        <section class="glass-panel rounded-2xl p-5 border-l-4 border-l-cyan-500 flex flex-col md:flex-row items-start justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 id="banner-project-title" class="text-sm font-bold text-white">E-Commerce FastAPI Backend</h4>
+              <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-300 font-bold">Unbiased & Fair Assessment</span>
+            </div>
+            <p id="banner-summary-text" class="text-xs text-slate-300 mt-1 leading-relaxed">
+              Review completed. The codebase demonstrates clear modularity and structured separation of concerns. Verified AST security patches and multi-form optimizations are ready to inspect.
+            </p>
+          </div>
+          <button onclick="switchRepoSubView('findings')" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 transition flex-shrink-0 cursor-pointer">
+            <span>View Actionable Fixes</span>
+            <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </section>
+
+        <!-- Recognized Code Strengths -->
+        <section class="glass-panel rounded-2xl p-5 border border-slate-800 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+              <span>Recognized Code Strengths & Commendations</span>
+            </h3>
+            <span class="text-xs text-slate-400">Objective Praise for Developer's Architecture</span>
+          </div>
+          <div id="strengths-overview-container" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-1">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+
+      </div>
+
+      <!-- SUB-VIEW 2: ACTIONABLE FINDINGS & REMEDIATIONS -->
+      <div id="repo-subview-findings" class="hidden flex flex-col gap-4">
+        
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-[#080f1e] p-3 rounded-xl border border-slate-800">
+          <div class="flex items-center gap-1.5 text-xs">
+            <button onclick="setFilterCategory('all')" id="filter-all" class="px-3 py-1 rounded-lg bg-cyan-600 text-white font-semibold">
+              All (<span id="count-all">10</span>)
+            </button>
+            <button onclick="setFilterCategory('security')" id="filter-sec" class="px-3 py-1 rounded-lg bg-slate-800 text-rose-300 hover:bg-slate-700 font-semibold">
+              Security (<span id="count-sec">3</span>)
+            </button>
+            <button onclick="setFilterCategory('efficiency')" id="filter-eff" class="px-3 py-1 rounded-lg bg-slate-800 text-amber-300 hover:bg-slate-700 font-semibold">
+              Efficiency (<span id="count-eff">3</span>)
+            </button>
+            <button onclick="setFilterCategory('bug')" id="filter-bug" class="px-3 py-1 rounded-lg bg-slate-800 text-emerald-300 hover:bg-slate-700 font-semibold">
+              Bugs & Reliability (<span id="count-bug">4</span>)
+            </button>
+          </div>
+
+          <input type="text" id="issues-search-box" placeholder="Search issues, rules..." oninput="filterIssuesList(this.value)" class="text-xs bg-[#030712] border border-slate-700 px-3 py-1.5 rounded-lg text-slate-200 focus:outline-none focus:border-cyan-500 w-64">
+        </div>
+
+        <div id="all-issues-list-container" class="flex flex-col gap-3">
+          <!-- Dynamically populated finding cards -->
+        </div>
+
+      </div>
+
+      <!-- SUB-VIEW 3: CODE INSPECTOR -->
+      <div id="repo-subview-inspector" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        
+        <div class="lg:col-span-4 glass-panel rounded-2xl p-4 flex flex-col gap-3 border border-slate-800">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="folder-tree" class="w-3.5 h-3.5 text-cyan-400"></i> Project Files
+            </span>
+            <span id="files-total-badge" class="text-[10px] text-slate-400 font-mono bg-slate-900 px-2 py-0.5 rounded">5 files</span>
+          </div>
+
+          <input type="text" id="file-search-box" placeholder="Filter files..." oninput="filterFiles(this.value)" class="text-xs bg-[#030712] border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300 focus:outline-none focus:border-cyan-500">
+
+          <div id="file-tree-container" class="flex flex-col gap-1.5 max-h-[500px] overflow-y-auto pr-1">
+            <!-- Dynamically populated files -->
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 glass-panel rounded-2xl flex flex-col overflow-hidden border border-slate-800">
+          <div class="flex items-center justify-between px-4 py-2.5 bg-[#080f1e] border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="file-code" class="w-4 h-4 text-cyan-400"></i>
+              <span id="current-filename" class="text-xs font-mono font-bold text-white">main.py</span>
+              <span id="current-file-badge" class="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-mono">3 Issues</span>
+            </div>
+            <button onclick="navigator.clipboard.writeText(state.currentReview.file_contents[state.selectedFile] || ''); showToast('File code copied!', 'success');" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-xs transition">Copy Code</button>
+          </div>
+
+          <div id="code-lines-container" class="p-3 max-h-[550px] overflow-y-auto overflow-x-auto bg-[#030712] font-mono text-xs">
+            <!-- Line by line code viewer -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 2: EFFICIENCY DUEL (STRICTLY CODE A VS CODE B) ==================== -->
+    <div id="view-duel" class="hidden flex flex-col gap-6 animate-fade-in-scale">
+      
+      <!-- Duel Header -->
+      <section class="glass-panel rounded-2xl p-6 border-l-4 border-l-amber-500 flex flex-col md:flex-row items-start justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-wider">
+              Code Arena
+            </span>
+            <span class="text-xs text-slate-400">• Computational Scaling vs Superficial Brevity</span>
+          </div>
+          <h2 class="text-xl font-bold text-white mt-1">Efficiency Duel: Code A vs Code B</h2>
+          <p class="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+            Paste any two implementations into the boxes below. Our engine benchmarks algorithmic complexity, operations under scale ($N = 10$ to $N = 1,000,000$), and crowns the decisive winner without guessing.
+          </p>
+        </div>
+
+        <!-- Sample Pairs Dropdown -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <label class="text-xs text-slate-400">Load Test Pair:</label>
+          <select id="select-duel-preset" onchange="loadDuelPreset(this.value)" class="text-xs bg-slate-800 border border-slate-700 text-slate-200 px-3 py-1.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500">
+            <option value="search" selected>Pair 1: Sequential Loop (Code A) vs Bisection (Code B)</option>
+            <option value="fibonacci">Pair 2: Recursive Formula (Code A) vs Iterative Loop (Code B)</option>
+            <option value="duplicates">Pair 3: Nested Iteration (Code A) vs Hash Set (Code B)</option>
+            <option value="sorting">Pair 4: Quadratic Sort (Code A) vs Divide & Conquer (Code B)</option>
+            <option value="string_builder">Pair 5: String Concat (Code A) vs List Buffer (Code B)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Side-by-Side Neutral Code Boxes (Code A vs Code B) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Code A Card -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border border-cyan-500/30 bg-[#070e1c]">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-md bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-xs">A</span>
+              <span class="text-xs font-bold text-white">Code A</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="loc-badge-a" class="text-[10px] text-cyan-300 font-mono bg-cyan-950 border border-cyan-800 px-2 py-0.5 rounded">3 LOC</span>
+              <span id="bigo-badge-a" class="text-[10px] text-slate-300 font-mono bg-slate-900 px-2 py-0.5 rounded">O(n) Time</span>
+            </div>
+          </div>
+
+          <textarea id="code-input-a" rows="9" oninput="handleCodeInput('a')" placeholder="// Paste any Code A here..." class="w-full bg-[#030712] text-xs font-mono text-slate-100 p-3 rounded-xl border border-slate-800 focus:outline-none focus:border-cyan-500 resize-y leading-relaxed" spellcheck="false"># Code A: Sequential Scan
+def find_item(arr, target):
+    for idx, item in enumerate(arr):
+        if item == target:
+            return idx
+    return -1
+</textarea>
+        </div>
+
+        <!-- Code B Card -->
+        <div class="glass-panel rounded-2xl p-4 flex flex-col gap-3 border border-emerald-500/30 bg-[#070e1c]">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-md bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-xs">B</span>
+              <span class="text-xs font-bold text-white">Code B</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span id="loc-badge-b" class="text-[10px] text-emerald-300 font-mono bg-emerald-950 border border-emerald-800 px-2 py-0.5 rounded">9 LOC</span>
+              <span id="bigo-badge-b" class="text-[10px] text-slate-300 font-mono bg-slate-900 px-2 py-0.5 rounded">O(log n) Time</span>
+            </div>
+          </div>
+
+          <textarea id="code-input-b" rows="9" oninput="handleCodeInput('b')" placeholder="// Paste any Code B here..." class="w-full bg-[#030712] text-xs font-mono text-slate-100 p-3 rounded-xl border border-slate-800 focus:outline-none focus:border-emerald-500 resize-y leading-relaxed" spellcheck="false"># Code B: Bisection Interval Scan
+def find_item(arr, target):
+    low, high = 0, len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+</textarea>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <div class="flex items-center justify-center">
+        <button onclick="runEfficiencyDuel()" class="px-8 py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-white font-bold text-sm rounded-xl shadow-lg shadow-orange-500/20 flex items-center gap-2.5 transition transform hover:-translate-y-0.5 cursor-pointer">
+          <i data-lucide="swords" class="w-4 h-4"></i>
+          <span>Run Efficiency Duel: Code A vs Code B</span>
+        </button>
+      </div>
+
+      <!-- Duel Results Container -->
+      <div id="duel-results-container" class="flex flex-col gap-6">
+        <!-- Dynamically rendered duel analysis -->
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 3: REUSABILITY & MULTI-FORM STUDIO ==================== -->
+    <div id="view-reusability" class="hidden flex flex-col gap-6 animate-fade-in-scale">
+      
+      <!-- Clean Header -->
+      <section class="glass-panel rounded-2xl p-6 border-l-4 border-l-violet-500 flex flex-col md:flex-row items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-violet-500/20 text-violet-300 border border-violet-500/40 uppercase">
+              Architecture Transformer
+            </span>
+            <span class="text-xs text-slate-400">• Multi-Form Optimization Blueprints</span>
+          </div>
+          <h2 class="text-xl font-bold text-white mt-1">Multi-Form Code Studio</h2>
+          <p class="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+            One size does not fit all in software engineering. Transform any bottleneck into 3 distinct production forms: <strong>High Speed</strong>, <strong>Low Memory</strong>, and <strong>Reusable Component</strong>.
+          </p>
+        </div>
+      </section>
+
+      <!-- Multi-Form Target Code Cards Container -->
+      <div id="all-optimizations-container" class="flex flex-col gap-6">
+        <!-- Dynamically populated multi-form code transformations -->
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 4: ARCHITECTURE & ERROR INSPECTOR ==================== -->
+    <div id="view-graph" class="hidden flex flex-col gap-6 animate-fade-in-scale">
+      
+      <!-- Top Controls & Scenario Bar (Inspired by Professor's Layer Player) -->
+      <section class="glass-panel rounded-2xl p-5 border-l-4 border-l-indigo-500 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase tracking-wider">
+              Layer-by-Layer Flow & Error Stepper
+            </span>
+            <span class="text-xs text-slate-400">• Follow a request from Frontend to DB</span>
+          </div>
+          <h2 class="text-lg font-bold text-white mt-1">System Architecture & Interactive Error Inspector</h2>
+          <p class="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+            Follow how user requests travel through your code. Step through each layer to see <strong>what is happening</strong> and <strong>where bugs or vulnerabilities occurred</strong>.
+          </p>
+        </div>
+
+        <!-- Controls: Scenario Quick Pills & Step Player Controls -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[#080f1e] p-3 rounded-2xl border border-slate-800 w-full lg:w-auto">
+          <!-- 3 Quick Scenario Pills -->
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="pill-sqli" onclick="changeRequestScenario('sqli')" class="scenario-pill scenario-pill-active flex items-center gap-1.5 cursor-pointer">
+              <span>🚨 1: SQL Injection (db.py Error)</span>
+            </button>
+            <button id="pill-normal" onclick="changeRequestScenario('normal')" class="scenario-pill flex items-center gap-1.5 cursor-pointer">
+              <span>🟢 2: Normal Login (Safe 200 OK)</span>
+            </button>
+            <button id="pill-slow_search" onclick="changeRequestScenario('slow_search')" class="scenario-pill flex items-center gap-1.5 cursor-pointer">
+              <span>🐢 3: Heavy Search (O(N²) Bottleneck)</span>
+            </button>
+          </div>
+
+          <!-- Step Player Controls -->
+          <div class="flex items-center gap-1 bg-[#091020] p-1 rounded-xl border border-slate-800 flex-shrink-0">
+            <button id="btn-player-back" onclick="stepRequestPlayer(-1)" class="px-3 py-1 text-xs text-slate-300 hover:text-white rounded-lg transition hover:bg-slate-800 cursor-pointer" title="Step Back">
+              ◀ Back
+            </button>
+            <button id="btn-player-play" onclick="togglePlayRequest()" class="px-3.5 py-1 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> <span id="btn-play-label">Play</span>
+            </button>
+            <button id="btn-player-next" onclick="stepRequestPlayer(1)" class="px-3 py-1 text-xs text-slate-300 hover:text-white rounded-lg transition hover:bg-slate-800 cursor-pointer" title="Step Forward">
+              Next ▶
+            </button>
+            <button onclick="resetRequestPlayer()" class="px-2.5 py-1 text-xs text-slate-400 hover:text-slate-200 rounded-lg transition cursor-pointer" title="Reset">
+              ↺
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Split Workspace: Left Flowchart (7 cols) + Right Step & Error Detail (5 cols) -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Column: The 4 System Layers (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col gap-3">
+          <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+            <span class="font-bold uppercase tracking-wider text-slate-300">System Flow: Layer by Layer</span>
+            <span id="player-progress-badge" class="font-mono text-cyan-400 font-semibold">Step 1 of 4</span>
+          </div>
+
+          <!-- Layer 1: Client UI -->
+          <div id="layer-card-0" onclick="jumpToLayer(0)" class="step-layer-card active-step p-4 cursor-pointer relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs font-bold">1</span>
+                <span class="font-bold text-sm text-white flex items-center gap-1.5">
+                  <i data-lucide="globe" class="w-4 h-4 text-amber-400"></i> Client: Web Browser UI
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="layer-status-0" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-cyan-500/20 text-cyan-300">Active</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono">Frontend SPA</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-300 pt-2">
+              <span id="layer-file-0">static/index.html & app.js</span>
+              <span id="layer-action-0" class="text-amber-400 font-mono text-[11px]">HTTP Request ➔</span>
+            </div>
+          </div>
+
+          <!-- Flow Arrow 1 -->
+          <div class="flex justify-center -my-1">
+            <span class="text-slate-600 text-xs">▼</span>
+          </div>
+
+          <!-- Layer 2: Root Gateway (main.py) -->
+          <div id="layer-card-1" onclick="jumpToLayer(1)" class="step-layer-card p-4 cursor-pointer relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xs font-bold">2</span>
+                <span class="font-bold text-sm text-white flex items-center gap-1.5">
+                  <i data-lucide="terminal" class="w-4 h-4 text-cyan-400"></i> Application Root Gateway: main.py
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="layer-status-1" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-slate-800 text-slate-400">Waiting</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono">Controller Tier</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-300 pt-2">
+              <span id="layer-file-1">app/main.py • Route Handler</span>
+              <span id="layer-action-1" class="text-cyan-400 font-mono text-[11px]">Dispatch Service ➔</span>
+            </div>
+          </div>
+
+          <!-- Flow Arrow 2 -->
+          <div class="flex justify-center -my-1">
+            <span class="text-slate-600 text-xs">▼</span>
+          </div>
+
+          <!-- Layer 3: Service Layer (auth.py) -->
+          <div id="layer-card-2" onclick="jumpToLayer(2)" class="step-layer-card p-4 cursor-pointer relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs font-bold">3</span>
+                <span id="layer-title-2" class="font-bold text-sm text-white flex items-center gap-1.5">
+                  <i data-lucide="cpu" class="w-4 h-4 text-indigo-400"></i> Business Logic: auth.py
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="layer-status-2" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-slate-800 text-slate-400">Waiting</span>
+                <span id="layer-tier-2" class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono">Service Tier</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-300 pt-2">
+              <span id="layer-file-2">app/auth.py • Core Logic</span>
+              <span id="layer-action-2" class="text-indigo-400 font-mono text-[11px]">Database Call ➔</span>
+            </div>
+          </div>
+
+          <!-- Flow Arrow 3 -->
+          <div class="flex justify-center -my-1">
+            <span class="text-slate-600 text-xs">▼</span>
+          </div>
+
+          <!-- Layer 4: Database Layer (db.py) -->
+          <div id="layer-card-3" onclick="jumpToLayer(3)" class="step-layer-card p-4 cursor-pointer relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xs font-bold">4</span>
+                <span class="font-bold text-sm text-white flex items-center gap-1.5">
+                  <i data-lucide="database" class="w-4 h-4 text-emerald-400"></i> Database Access: db.py
+                </span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="layer-status-3" class="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-slate-800 text-slate-400">Waiting</span>
+                <span id="layer-badge-3" class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Database Tier</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-300 pt-2">
+              <span id="layer-file-3">app/db.py • Data Storage</span>
+              <span id="layer-action-3" class="text-emerald-400 font-mono text-[11px]">Execute Query ➔</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Step Detail & Error Inspector (5 cols) -->
+        <div class="lg:col-span-5 glass-panel-elevated rounded-2xl p-5 border border-slate-800 flex flex-col gap-4 sticky top-16">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Step Detail & Inspector</span>
+              <h3 id="step-active-layer-title" class="text-sm font-bold text-white mt-0.5">1. Client: Web Browser UI</h3>
+            </div>
+            <span id="step-badge" class="px-2.5 py-1 rounded text-xs font-mono font-bold bg-amber-500/20 text-amber-300">Client / UI</span>
+          </div>
+
+          <!-- What is Happening Section -->
+          <div class="flex flex-col gap-1.5">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5 text-cyan-400"></i> What is happening at this step?
+            </span>
+            <p id="step-what-happening" class="text-xs text-slate-200 leading-relaxed bg-[#060c18] p-3 rounded-xl border border-slate-800">
+              User enters credentials in the web browser and clicks Login. The frontend dispatches an asynchronous HTTP POST request to /api/login.
+            </p>
+          </div>
+
+          <!-- Active Code Running -->
+          <div class="flex flex-col gap-1.5">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <i data-lucide="code" class="w-3.5 h-3.5 text-indigo-400"></i> Code Executing at this Layer:
+            </span>
+            <div class="bg-black/80 rounded-xl p-3 border border-slate-800 font-mono text-xs overflow-x-auto text-emerald-300">
+              <pre id="step-code-snippet">fetch("/api/login", {
+  method: "POST",
+  body: JSON.stringify({ username: "' OR '1'='1", pass: "xyz" })
+});</pre>
+            </div>
+          </div>
+
+          <!-- Error or Vulnerability Status Box -->
+          <div id="step-error-container" class="flex flex-col gap-2">
+            <!-- Dynamically populated with Clean or Error alert -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ==================== TAB 5: PIPELINE ENGINE (USAGE & LIVE DEMO) ==================== -->
+    <div id="view-pipeline" class="hidden flex flex-col gap-6 animate-fade-in-scale">
+      
+      <!-- Clear Explanation of Pipeline Usage -->
+      <section class="glass-panel rounded-2xl p-6 border-l-4 border-l-emerald-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+              FT-05 Pipeline Architecture
+            </span>
+            <span class="text-xs text-slate-400">• Why This Pipeline Matters</span>
+          </div>
+          <h2 class="text-xl font-bold text-white mt-1">Automated Review Pipeline: What It Does & How It Works</h2>
+          <p class="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+            Every repository submitted to CodeSentinel flows through these 5 automated stages. It ensures 100% deterministic AST verification, eliminates AI hallucinations, and provides instant 1-click safe remediation diffs.
+          </p>
+        </div>
+
+        <button onclick="runPipelineSimulation()" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-900 font-bold text-xs rounded-xl shadow-lg transition flex items-center gap-2 cursor-pointer flex-shrink-0">
+          <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+          <span>Run Live Pipeline Simulation</span>
+        </button>
+      </section>
+
+      <!-- 5 Stages Grid with Concrete Outputs -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        
+        <div id="stage-card-1" class="p-4 rounded-xl bg-[#091020] border border-slate-800 flex flex-col gap-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-cyan-500/20 text-cyan-400 font-bold text-xs flex items-center justify-center">1</span>
+            <span class="text-[10px] font-mono text-cyan-400">12 ms</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">1. Repo / PR Input</h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Ingests ZIP stream or Git PR. Strips node_modules, build artifacts & binaries to fit memory budget.
+          </p>
+          <div class="p-2 rounded bg-black/60 font-mono text-[10px] text-cyan-300 mt-auto">
+            Input: 45MB ZIP ➔ 5 source files
+          </div>
+        </div>
+
+        <div id="stage-card-2" class="p-4 rounded-xl bg-[#091020] border border-slate-800 flex flex-col gap-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs flex items-center justify-center">2</span>
+            <span class="text-[10px] font-mono text-indigo-400">28 ms</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">2. Parse & Index</h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Extracts AST syntax trees, symbol tables, and builds cross-file import connections into a DAG.
+          </p>
+          <div class="p-2 rounded bg-black/60 font-mono text-[10px] text-indigo-300 mt-auto">
+            Output: 1,420 AST nodes indexed
+          </div>
+        </div>
+
+        <div id="stage-card-3" class="p-4 rounded-xl bg-[#091020] border border-slate-800 flex flex-col gap-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-violet-500/20 text-violet-400 font-bold text-xs flex items-center justify-center">3</span>
+            <span class="text-[10px] font-mono text-violet-400">45 ms</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">3. Static AST + LLM</h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Combines deterministic AST security rules (SQLi, secrets) with LLM context reasoning.
+          </p>
+          <div class="p-2 rounded bg-black/60 font-mono text-[10px] text-violet-300 mt-auto">
+            Findings: SQLi, JWT flaws detected
+          </div>
+        </div>
+
+        <div id="stage-card-4" class="p-4 rounded-xl bg-[#091020] border border-slate-800 flex flex-col gap-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 font-bold text-xs flex items-center justify-center">4</span>
+            <span class="text-[10px] font-mono text-amber-400">15 ms</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">4. Rank & Deduplicate</h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Filters false positives using SonarQube & ISO-25010 rubric. Credits developer's positive strengths.
+          </p>
+          <div class="p-2 rounded bg-black/60 font-mono text-[10px] text-amber-300 mt-auto">
+            Clean 10 Action Items Ranked
+          </div>
+        </div>
+
+        <div id="stage-card-5" class="p-4 rounded-xl bg-[#091020] border border-slate-800 flex flex-col gap-2 transition-all">
+          <div class="flex items-center justify-between">
+            <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs flex items-center justify-center">5</span>
+            <span class="text-[10px] font-mono text-emerald-400">8 ms</span>
+          </div>
+          <h4 class="text-xs font-bold text-white">5. Actionable Fixes</h4>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Injects 1-click verified patches, multi-form blueprints, and exports professional PDF report.
+          </p>
+          <div class="p-2 rounded bg-black/60 font-mono text-[10px] text-emerald-300 mt-auto">
+            Result: 1-Click Patch & PDF Export
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- App Script with Cache Busting -->
+  <script src="/app.js?v=2.7.0"></script>
+</body>
+</html>
