@@ -6,11 +6,9 @@
 
 ## 👥 Team Information
 
-* **Team Name:** `CodeSentinel Team` *(Update with your Team Name)*
-* **Team Members:**
-  * **Lead Developer / Architect:** `[Your Name / Member 1]` — Full-Stack Architecture, AST Engine & Security Rules
-  * **AI / Systems Engineer:** `[Member 2 Name]` — Multi-Form Optimizations, Big-O Duel Benchmarking
-  * **UI/UX & Quality Assurance:** `[Member 3 Name]` — Interactive Flowchart Stepper, Responsive Interface & Test Automation
+* **Team Name:** `Tech_Solo`
+* **Team Member:**
+  * **Sreenivasan M** — Lead Full-Stack Architect, AI Systems Engineer & UI/UX Developer
 
 ---
 
