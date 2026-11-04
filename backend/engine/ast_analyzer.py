@@ -266,9 +266,17 @@ class PythonASTAnalyzer(ast.NodeVisitor):
                 "confidence": 0.99
             })
 
-        # Check SQL Injection on cursor.execute(...)
-        if func_name == "execute":
+        # Check SQL Injection on database methods (SQLite, PostgreSQL, MySQL, Oracle, SQLAlchemy)
+        db_exec_methods = ("execute", "executemany", "raw", "raw_query", "text", "query")
+        if func_name in db_exec_methods:
             self._check_sql_injection(node)
+        elif isinstance(node.func, ast.Attribute) and node.func.attr in db_exec_methods:
+            self._check_sql_injection(node)
+
+        # Check NoSQL Injection on MongoDB collection methods
+        nosql_methods = ("find", "find_one", "aggregate", "delete_many", "update_many", "count_documents")
+        if func_name in nosql_methods or (isinstance(node.func, ast.Attribute) and node.func.attr in nosql_methods):
+            self._check_nosql_injection(node)
 
         # Check resource leak: open() not inside with statement
         if func_name == "open" and not self._is_inside_with(node):
@@ -393,16 +401,19 @@ class PythonASTAnalyzer(ast.NodeVisitor):
         first_arg = node.args[0]
         orig = self._get_snippet(node.lineno)
 
-        # Check f-string or string concatenation
-        is_sqli = False
-        if isinstance(first_arg, ast.JoinedStr):  # f-string: f"SELECT * FROM users WHERE id = {user_id}"
-            is_sqli = True
-        elif isinstance(first_arg, ast.BinOp) and isinstance(first_arg.op, ast.Add):  # "SELECT " + val
-            is_sqli = True
-        elif isinstance(first_arg, ast.BinOp) and isinstance(first_arg.op, ast.Mod):  # "SELECT %s" % val
-            is_sqli = True
+        def _is_dynamic_sql(target_node):
+            if isinstance(target_node, ast.JoinedStr):
+                return True
+            if isinstance(target_node, ast.BinOp) and isinstance(target_node.op, (ast.Add, ast.Mod)):
+                return True
+            if isinstance(target_node, ast.Call):
+                if isinstance(target_node.func, ast.Attribute) and target_node.func.attr == "format":
+                    return True
+                if target_node.args and _is_dynamic_sql(target_node.args[0]):
+                    return True
+            return False
 
-        if is_sqli:
+        if _is_dynamic_sql(first_arg):
             self.issues.append({
                 "id": str(uuid.uuid4())[:8],
                 "file": self.filename,
@@ -411,14 +422,42 @@ class PythonASTAnalyzer(ast.NodeVisitor):
                 "category": "security",
                 "severity": "critical",
                 "title": "SQL Injection via Dynamic String Formatting",
-                "description": "SQL query is composed using string concatenation or f-strings instead of parameterized queries.",
+                "description": "SQL query is composed using string concatenation, f-strings, or format() instead of parameterized queries (CWE-89).",
                 "impact": "Data exfiltration, unauthorized database writes, authentication bypass, or full database drop.",
                 "rule_id": "SEC-SQL-INJECTION",
                 "original_code": orig,
                 "suggested_fix": "cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))",
-                "explanation": "Always pass SQL parameters separately using database driver parameter markers (`%s` or `?`) to enforce automatic quoting and type safety.",
+                "explanation": "Always pass SQL parameters separately using database driver parameter markers (`%s` for PostgreSQL/MySQL, `?` for SQLite, `:param` for Oracle/SQLAlchemy) to enforce automatic quoting and type safety.",
                 "diff": self._make_diff(orig, "cursor.execute('SELECT ... WHERE id = %s', (param,))"),
                 "confidence": 0.99
+            })
+
+    def _check_nosql_injection(self, node: ast.Call):
+        orig = self._get_snippet(node.lineno)
+        has_nosqli = False
+        for child in ast.walk(node):
+            val = getattr(child, "value", None)
+            if val == "$where":
+                has_nosqli = True
+                break
+
+        if has_nosqli:
+            self.issues.append({
+                "id": str(uuid.uuid4())[:8],
+                "file": self.filename,
+                "line": node.lineno,
+                "column": node.col_offset + 1,
+                "category": "security",
+                "severity": "critical",
+                "title": "NoSQL Injection via $where Expression",
+                "description": "MongoDB $where executes arbitrary JavaScript expressions. Dynamic string interpolation allows arbitrary script execution (CWE-943).",
+                "impact": "Remote JavaScript execution inside the database engine, database exfiltration, authentication bypass.",
+                "rule_id": "SEC-NOSQL-INJECTION",
+                "original_code": orig,
+                "suggested_fix": "db.collection.find({'field': value})  # Use standard declarative query operators",
+                "explanation": "Avoid $where with untrusted input; use standard MongoDB query operators ($eq, $in) or parameterize queries.",
+                "diff": self._make_diff(orig, "db.collection.find({'key': value})"),
+                "confidence": 0.98
             })
 
     def _check_loop_inefficiency(self, node):

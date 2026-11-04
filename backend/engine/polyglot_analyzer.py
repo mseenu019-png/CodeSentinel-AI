@@ -195,6 +195,48 @@ class PolyglotAnalyzer:
                     "confidence": 0.93
                 })
 
+            # Node.js Database Query SQL Injection (query, execute, raw, rawQuery)
+            if re.search(r'\b(query|execute|raw|rawQuery)\s*\(', stripped):
+                is_sql_call = any(kw in stripped.upper() for kw in ("SELECT", "INSERT", "UPDATE", "DELETE", "DROP", "FROM"))
+                if is_sql_call and (("`" in stripped and "${" in stripped) or ("+" in stripped and ("'" in stripped or '"' in stripped))):
+                    self.issues.append({
+                        "id": str(uuid.uuid4())[:8],
+                        "file": self.filename,
+                        "line": idx,
+                        "column": 1,
+                        "category": "security",
+                        "severity": "critical",
+                        "title": "SQL Injection in Database Query",
+                        "description": "Database query composed using string concatenation or template literal interpolation instead of parameterized placeholders.",
+                        "impact": "Data exfiltration, unauthorized database writes, authentication bypass.",
+                        "rule_id": "SEC-SQL-INJECTION",
+                        "original_code": stripped,
+                        "suggested_fix": "pool.query('SELECT * FROM tbl WHERE id = $1', [id])",
+                        "explanation": "Use parameterized queries ($1, ?, :param) or ORM parameter binding.",
+                        "diff": self._make_diff(stripped, "pool.query('SELECT ... WHERE id = $1', [param]);"),
+                        "confidence": 0.98
+                    })
+
+            # Node.js MongoDB NoSQL Injection ($where)
+            if "$where" in stripped and ("+" in stripped or "${" in stripped):
+                self.issues.append({
+                    "id": str(uuid.uuid4())[:8],
+                    "file": self.filename,
+                    "line": idx,
+                    "column": stripped.find("$where") + 1,
+                    "category": "security",
+                    "severity": "critical",
+                    "title": "NoSQL Injection via $where Clause",
+                    "description": "MongoDB $where executes arbitrary JavaScript expressions. String concatenation permits arbitrary JavaScript injection.",
+                    "impact": "Remote JavaScript code execution, database breach.",
+                    "rule_id": "SEC-NOSQL-INJECTION",
+                    "original_code": stripped,
+                    "suggested_fix": "collection.find({ field: value })",
+                    "explanation": "Use declarative query filters instead of $where string concatenation.",
+                    "diff": self._make_diff(stripped, "collection.find({ field: value });"),
+                    "confidence": 0.98
+                })
+
     def _analyze_java(self):
         for idx, line in enumerate(self.lines, 1):
             stripped = line.strip()

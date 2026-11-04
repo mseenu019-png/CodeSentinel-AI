@@ -177,5 +177,73 @@ def calc(x=[]):
         self.assertEqual(len(review.files), 2)
         print(f"[PASS] Test 09: ZIP Ingestion Passed ({len(review.files)} files processed, node_modules filtered)")
 
+    def test_10_multi_database_coverage(self):
+        """Verify comprehensive vulnerability detection and clean execution across multiple databases."""
+        # 1. SQLite Vulnerability & Clean Test
+        sqlite_bad = 'def get_item(cursor, item):\n    cursor.execute(f"SELECT * FROM items WHERE name = \'{item}\'")\n'
+        sqlite_good = "def get_item(cursor, item):\n    cursor.execute('SELECT * FROM items WHERE name = ?', (item,))\n"
+        issues_sb, _ = PythonASTAnalyzer("sqlite_bad.py", sqlite_bad).analyze()
+        issues_sg, _ = PythonASTAnalyzer("sqlite_good.py", sqlite_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_sb))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_sg))
+
+        # 2. PostgreSQL Vulnerability & Clean Test
+        pg_bad = 'def get_user(cursor, email):\n    cursor.execute("SELECT * FROM users WHERE email = \'%s\'" % email)\n'
+        pg_good = "def get_user(cursor, email):\n    cursor.execute('SELECT * FROM users WHERE email = %s', (email,))\n"
+        issues_pb, _ = PythonASTAnalyzer("pg_bad.py", pg_bad).analyze()
+        issues_pg, _ = PythonASTAnalyzer("pg_good.py", pg_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_pb))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_pg))
+
+        # 3. MySQL / MariaDB Vulnerability & Clean Test
+        mysql_bad = "def get_product(cursor, pid):\n    cursor.execute('SELECT * FROM products WHERE id = ' + str(pid))\n"
+        mysql_good = "def get_product(cursor, pid):\n    cursor.execute('SELECT * FROM products WHERE id = %s', (pid,))\n"
+        issues_mb, _ = PythonASTAnalyzer("mysql_bad.py", mysql_bad).analyze()
+        issues_mg, _ = PythonASTAnalyzer("mysql_good.py", mysql_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_mb))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_mg))
+
+        # 4. Oracle / Format String Vulnerability & Clean Test
+        oracle_bad = "def get_emp(cursor, eid):\n    cursor.execute('SELECT * FROM employees WHERE emp_id = {}'.format(eid))\n"
+        oracle_good = "def get_emp(cursor, eid):\n    cursor.execute('SELECT * FROM employees WHERE emp_id = :id', {'id': eid})\n"
+        issues_ob, _ = PythonASTAnalyzer("oracle_bad.py", oracle_bad).analyze()
+        issues_og, _ = PythonASTAnalyzer("oracle_good.py", oracle_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_ob))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_og))
+
+        # 5. SQLAlchemy ORM execute(text(...)) Vulnerability & Clean Test
+        orm_bad = 'def query_orders(session, s):\n    session.execute(text(f"SELECT * FROM orders WHERE status = \'{s}\'"))\n'
+        orm_good = "def query_orders(session, s):\n    session.execute(text('SELECT * FROM orders WHERE status = :status'), {'status': s})\n"
+        issues_orm_b, _ = PythonASTAnalyzer("orm_bad.py", orm_bad).analyze()
+        issues_orm_g, _ = PythonASTAnalyzer("orm_good.py", orm_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_orm_b))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in issues_orm_g))
+
+        # 6. MongoDB NoSQL $where Injection & Clean Test
+        mongo_bad = 'def find_doc(db, user):\n    return db.users.find({"$where": f"this.name == \'{user}\'"})\n'
+        mongo_good = "def find_doc(db, user):\n    return db.users.find({'name': user})\n"
+        issues_mng_b, _ = PythonASTAnalyzer("mongo_bad.py", mongo_bad).analyze()
+        issues_mng_g, _ = PythonASTAnalyzer("mongo_good.py", mongo_good).analyze()
+        self.assertTrue(any(i["rule_id"] == "SEC-NOSQL-INJECTION" for i in issues_mng_b))
+        self.assertFalse(any(i["rule_id"] == "SEC-NOSQL-INJECTION" for i in issues_mng_g))
+
+        # 7. Polyglot Node.js & Java Database Query Tests
+        node_bad = "const res = pool.query(`SELECT * FROM accounts WHERE id = ${id}`);"
+        node_good = "const res = pool.query('SELECT * FROM accounts WHERE id = $1', [id]);"
+        java_bad = 'ResultSet rs = stmt.executeQuery("SELECT * FROM records WHERE id = " + id);'
+        java_good = 'PreparedStatement ps = conn.prepareStatement("SELECT * FROM records WHERE id = ?");'
+
+        p_node_bad, _ = PolyglotAnalyzer("app.js", node_bad, "javascript").analyze()
+        p_node_good, _ = PolyglotAnalyzer("app.js", node_good, "javascript").analyze()
+        p_java_bad, _ = PolyglotAnalyzer("App.java", java_bad, "java").analyze()
+        p_java_good, _ = PolyglotAnalyzer("App.java", java_good, "java").analyze()
+
+        self.assertTrue(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in p_node_bad))
+        self.assertFalse(any(i["rule_id"] == "SEC-SQL-INJECTION" for i in p_node_good))
+        self.assertTrue(any(i["rule_id"] == "SEC-JAVA-SQLI" for i in p_java_bad))
+        self.assertFalse(any(i["rule_id"] == "SEC-JAVA-SQLI" for i in p_java_good))
+
+        print("[PASS] Test 10: Multi-Database Coverage Passed (SQLite, PostgreSQL, MySQL, Oracle, SQLAlchemy, MongoDB, Node.js & Java)\n")
+
 if __name__ == "__main__":
     unittest.main()
