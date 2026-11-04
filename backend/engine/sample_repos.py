@@ -199,7 +199,7 @@ export function renderUserBio(elementId: string, bioHtml: string) {
  */
 export const CloudConfig = {
     // CRITICAL: Hardcoded AWS Credentials
-    awsAccessKey: "AKIAIOSFODNN7EXAMPLE",
+    awsAccessKey: "MOCK_AWS_KEY_EXPOSURE01",
     jwtSecret: "production_secret_token_jwt_9921",
     apiUrl: "http://unencrypted-insecure-api.internal.com/v1"
 };

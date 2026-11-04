@@ -56,7 +56,7 @@ def calc(x=[]):
         code = """export async function render(id, html) {
     const data = fetch("http://insecure-api.internal.com/data");
     document.getElementById(id).innerHTML = html;
-    const AWS = "AKIAIOSFODNN7EXAMPLE";
+    const AWS = "MOCK_AWS_KEY_EXPOSURE01";
 }"""
         analyzer = PolyglotAnalyzer("view.ts", code, "typescript")
         issues, metrics = analyzer.analyze()

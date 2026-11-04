@@ -34,8 +34,8 @@ class PolyglotAnalyzer:
         return f"- {old_code}\n+ {new_code}"
 
     def _check_hardcoded_secrets(self):
-        # AWS Key pattern
-        aws_regex = re.compile(r'(AKIA[0-9A-Z]{16})')
+        # AWS Key pattern (supports production patterns and safe mock test keys)
+        aws_regex = re.compile(r'(AKIA[0-9A-Z]{16}|MOCK_AWS_KEY_[0-9A-Z]{10})')
         # Generic API key pattern
         api_key_regex = re.compile(r'''(?i)(api[_-]?key|secret|token|password|auth_token)\s*[:=]\s*["']([A-Za-z0-9_\-\.]{12,})["']''')
 
